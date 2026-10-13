@@ -2,7 +2,7 @@
 
 ## Descargar e instalar
 
-**[Descargar Anime4K para Brave en ZIP](https://github.com/Juaan211/anime4k-brave/archive/refs/heads/main.zip)**. Es un ZIP generado desde la rama `main`; extraelo y, en Brave, abrí `brave://extensions`, activá **Modo desarrollador**, elegí **Cargar desempaquetada** y seleccioná la carpeta extraída que contiene `manifest.json`. También podés obtenerlo con **Code → Download ZIP**. La extensión todavía no está publicada en Chrome Web Store ni tiene un paquete en Releases.
+En GitHub, elegí **Code → Download ZIP** y extraelo en una carpeta. En Brave, abrí `brave://extensions`, activá **Modo desarrollador**, elegí **Cargar desempaquetada** y seleccioná la carpeta extraída que contiene `manifest.json`. La extensión todavía no está publicada en Chrome Web Store ni tiene un paquete en Releases; este método permite probarla desde el repositorio.
 
 Por seguridad, cada hostname empieza desactivado: no aparece la interfaz ni se procesa ningún video. Presioná **F1** una vez para activar Anime4K en ese sitio. En sitios activados aparece un panel translúcido dentro del reproductor, con Shadow DOM para aislarlo del CSS del sitio. Se muestra al mover el mouse y se oculta tras 3 segundos sin actividad. La **X** activa el modo manual persistente; el panel solo vuelve con F1 o con el indicador casi transparente de la esquina. El botón **Desactivar en este sitio** borra la activación y retira el canvas, restaura el video y detiene el procesamiento. El panel intenta colocarse en una esquina libre de controles y subtítulos. Al entrar en pantalla completa, se mueve dentro del elemento que ocupa la pantalla.
 
@@ -51,26 +51,19 @@ La guía oficial explica que A, B y C tratan degradaciones diferentes y recomien
 
 **Elección rápida:** empezá por A para 1080p; probá B si A se ve demasiado fuerte o el video es 720p; probá C en fuentes muy reducidas o ruidosas. Cambiá a HQ si querés comparar una variante más trabajada y tu GPU tiene margen. A 1080p de entrada, Fast suele ser la opción más prudente: la guía advierte que A+A puede sobreenfocar si no se escala al menos 2×. [Documentación de `ModeAA` en el port WebGPU](https://github.com/Anime4KWebBoost/Anime4K-WebGPU/blob/main/src/pipelines/presets/ModeAA/index.ts).
 
-## Rendimiento
-
-Para reducir trabajo de CPU y de layout, la posición del canvas se actualiza aproximadamente 30 veces por segundo mientras se reproduce y 4 veces por segundo cuando está pausado, en vez de hacerlo en cada refresco del monitor. Esto reduce revisiones de la interfaz, pero no acelera por sí mismo los shaders. La calidad Máxima a 2× sigue siendo exigente: duplicar ancho y alto implica procesar cuatro veces más píxeles. Si hay tirones, bajar la escala o elegir HQ/Fast reduce la carga.
-
-En los sitios todavía desactivados solo queda un bootstrap liviano para F1. El controlador completo se carga al activar el dominio y la librería de shaders se carga cuando el filtro empieza a procesar. Esto puede demorar un poco la primera aparición del panel, pero mantiene los mismos shaders, presets y calidad durante el procesamiento.
-
 ## Diseño del panel
 
 El panel usa cristal oscuro, el logo transparente `assets/logo-perro.png` y mascotas decorativas locales de `assets/poodle-sprites.png`. Los adornos no reciben clics ni ejecutan animaciones continuas. En reproductores pequeños se ocultan los adornos y se compacta el panel, conservando el scroll interno. La sección de foto IA se despliega para mostrar sus acciones; al usar su atajo, se abre para mostrar el progreso.
 
 ## Archivos principales
 
-- `manifest.json`: configura Manifest V3, los permisos y el bootstrap liviano para los frames.
-- `bootstrap.js`: atiende F1 y carga el controlador solo en sitios activados.
-- `content.js`: maneja el panel y el procesamiento; el bundle de Anime4K se carga al empezar a renderizar.
-- `content.js`: detecta videos, maneja atajos, procesa Anime4K y filtros con WebGPU, e incluye las funciones experimentales documentadas en este archivo.
+- `manifest.json`: configura Manifest V3, carga el controlador en los frames y declara los permisos de la extensión.
+- `content.js`: controla el panel y los atajos desde que carga la página, detecta videos y procesa Anime4K y filtros con WebGPU. La librería pesada de shaders se carga solo cuando activás el filtro.
 - `tools/convert_model.py`: convierte el checkpoint oficial `.pth` a ONNX sin inventar pesos.
 - `models/README.md`: instrucciones de conversión y uso de los modelos incluidos.
 - `popup.html`, `popup.css` y `popup.js`: muestran el hostname, activan o desactivan Anime4K y permiten elegir Fast, HQ o Máxima para ese dominio.
-- `icons/icon16.png`, `icons/icon32.png`, `icons/icon48.png` y `icons/icon128.png`: íconos de la extensión y del popup.\n- `assets/logo-perro.png`: logo con fondo transparente para el panel y el popup.
+- `icons/icon16.png`, `icons/icon32.png`, `icons/icon48.png` y `icons/icon128.png`: íconos de la extensión y del popup.
+- `assets/logo-perro.png`: logo con fondo transparente para el panel y el popup.
 - `vendor/anime4k-webgpu-1.0.0.js`: bundle de la librería.
 - `vendor/ANIME4K-WEBGPU-LICENSE-MIT.txt`: licencia MIT incluida con el bundle.
 - `THIRD_PARTY_NOTICES.md`: aviso de terceros.
@@ -90,6 +83,8 @@ El panel usa cristal oscuro, el logo transparente `assets/logo-perro.png` y masc
 
 Los milisegundos son el tiempo observado desde la preparación del frame hasta que termina el trabajo enviado a la cola GPU. El presupuesto se estima a partir de la cadencia reciente del video; cerca de 24 fps debería rondar 41,7 ms. La cola GPU ocupada también puede influir.
 
+El controlador de la interfaz se carga de forma estática en los frames de la página para que los botones y atajos estén disponibles de manera fiable. La librería de shaders de Anime4K se mantiene bajo carga diferida: solo se solicita en un sitio activado cuando se empieza a renderizar. Esto evita cargar ese bundle pesado en sitios que no usan Anime4K, sin cambiar la calidad elegida ni la composición de los presets.
+
 Si WebGPU falla, la extensión oculta el canvas y restaura el video original. No intenta eludir CORS ni DRM; esos bloqueos pueden impedir la lectura del video.
 
 chrome.storage necesita el permiso storage en el manifiesto y está disponible en los content scripts. Usamos su área local para conservar los ajustes en este navegador. [Documentación oficial de chrome.storage](https://developer.chrome.com/docs/extensions/reference/api/storage).
@@ -101,3 +96,4 @@ En **Imagen**, pausá el video en un frame nítido y tocá **Procesar foto con I
 **Ejemplo para sacar una captura cuidada:** pausá en el instante más enfocado; para comparar, poné Anime4K en **Máxima** y elegí **2×** o **Auto**; activá **Detalle** y ajustá **Nitidez** con moderación si querés que esos filtros también afecten la vista IA; procesá la foto, compará con Anime4K y guardá el PNG. La calidad y escala de Anime4K solo afectan la vista Anime4K; el modelo de foto produce x2 fijo. Detalle y Nitidez sí se aplican a la salida IA cuando están activados.
 
 La sesión ONNX se inicia solo cuando pedís procesar una imagen pausada; no procesa video en vivo ni reserva la sesión durante la reproducción. Si el navegador bloquea la lectura del video por CORS/DRM o falta el modelo/WebGPU, el panel muestra un aviso. La inferencia WebGPU y la presentación final deben confirmarse en Brave real.
+

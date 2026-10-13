@@ -1,9 +1,6 @@
 const AI_CHANNEL = "anime4k-ai";
 const ENGINE_CHANNEL = "anime4k-engine";
-const ENGINE_SCRIPTS = {
-  controller: "content.js",
-  engine: "vendor/anime4k-webgpu-1.0.0.js"
-};
+const ENGINE_SCRIPT = "vendor/anime4k-webgpu-1.0.0.js";
 const OFFSCREEN_CHANNEL = "anime4k-ai-offscreen";
 const OFFSCREEN_PATH = "offscreen.html";
 let offscreenCreation = null;
@@ -31,8 +28,7 @@ async function ensureAiOffscreen() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.channel === ENGINE_CHANNEL && sender.id === chrome.runtime.id) {
     (async () => {
-      const script = ENGINE_SCRIPTS[message.action];
-      if (!script || !Number.isInteger(sender.tab?.id) || !Number.isInteger(sender.frameId)) {
+      if (message.action !== "load" || !Number.isInteger(sender.tab?.id) || !Number.isInteger(sender.frameId)) {
         throw new Error("No se pudo identificar la pestaña o el frame del reproductor");
       }
       const pageUrl = new URL(sender.url || sender.origin || "");
@@ -46,7 +42,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
       await chrome.scripting.executeScript({
         target: { tabId: sender.tab.id, frameIds: [sender.frameId] },
-        files: [script],
+        files: [ENGINE_SCRIPT],
         world: "ISOLATED"
       });
       return { ok: true };

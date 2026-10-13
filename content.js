@@ -1,6 +1,4 @@
 (() => {
-  if (globalThis.__anime4kControllerLoaded) return;
-  globalThis.__anime4kControllerLoaded = true;
   const running = new WeakSet();
   const diagnostics = new Set();
   const hostname = location.hostname;
