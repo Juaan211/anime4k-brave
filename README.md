@@ -2,7 +2,7 @@
 
 ## Descargar e instalar
 
-En GitHub, elegí **Code → Download ZIP** y extraelo en una carpeta. En Brave, abrí `brave://extensions`, activá **Modo desarrollador**, elegí **Cargar desempaquetada** y seleccioná la carpeta extraída que contiene `manifest.json`. La extensión todavía no está publicada en Chrome Web Store ni tiene un paquete en Releases; este método permite probarla desde el repositorio.
+**[Descargar Anime4K para Brave en ZIP](https://github.com/Juaan211/anime4k-brave/archive/refs/heads/main.zip)**. Es un ZIP generado desde la rama `main`; extraelo y, en Brave, abrí `brave://extensions`, activá **Modo desarrollador**, elegí **Cargar desempaquetada** y seleccioná la carpeta extraída que contiene `manifest.json`. También podés obtenerlo con **Code → Download ZIP**. La extensión todavía no está publicada en Chrome Web Store ni tiene un paquete en Releases.
 
 Por seguridad, cada hostname empieza desactivado: no aparece la interfaz ni se procesa ningún video. Presioná **F1** una vez para activar Anime4K en ese sitio. En sitios activados aparece un panel translúcido dentro del reproductor, con Shadow DOM para aislarlo del CSS del sitio. Se muestra al mover el mouse y se oculta tras 3 segundos sin actividad. La **X** activa el modo manual persistente; el panel solo vuelve con F1 o con el indicador casi transparente de la esquina. El botón **Desactivar en este sitio** borra la activación y retira el canvas, restaura el video y detiene el procesamiento. El panel intenta colocarse en una esquina libre de controles y subtítulos. Al entrar en pantalla completa, se mueve dentro del elemento que ocupa la pantalla.
 
@@ -50,6 +50,10 @@ Revisé los exports reales del bundle instalado (`anime4k-webgpu` 1.0.0). Tiene 
 La guía oficial explica que A, B y C tratan degradaciones diferentes y recomienda comparar visualmente. También advierte que las variantes secundarias son más lentas y están pensadas para escalados de 2× o más. Por eso Fast/HQ son nombres simples de los dos niveles en esta extensión; los nombres oficiales de los presets son los de la primera columna. [Guía avanzada oficial de Anime4K](https://github.com/bloc97/Anime4K/blob/master/md/GLSL_Instructions_Advanced.md). La extensión ofrece los seis presets completos que exporta esta versión y una composición Máxima propia basada en etapas disponibles. El bundle también exporta bloques de shader y utilidades de bajo nivel, pero no son modos completos adicionales para elegir.
 
 **Elección rápida:** empezá por A para 1080p; probá B si A se ve demasiado fuerte o el video es 720p; probá C en fuentes muy reducidas o ruidosas. Cambiá a HQ si querés comparar una variante más trabajada y tu GPU tiene margen. A 1080p de entrada, Fast suele ser la opción más prudente: la guía advierte que A+A puede sobreenfocar si no se escala al menos 2×. [Documentación de `ModeAA` en el port WebGPU](https://github.com/Anime4KWebBoost/Anime4K-WebGPU/blob/main/src/pipelines/presets/ModeAA/index.ts).
+
+## Rendimiento
+
+Para reducir trabajo de CPU y de layout, la posición del canvas se actualiza aproximadamente 30 veces por segundo mientras se reproduce y 4 veces por segundo cuando está pausado, en vez de hacerlo en cada refresco del monitor. Esto reduce revisiones de la interfaz, pero no acelera por sí mismo los shaders. La calidad Máxima a 2× sigue siendo exigente: duplicar ancho y alto implica procesar cuatro veces más píxeles. Si hay tirones, bajar la escala o elegir HQ/Fast reduce la carga.
 
 ## Diseño del panel
 
