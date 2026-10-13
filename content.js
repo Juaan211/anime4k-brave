@@ -1,4 +1,6 @@
 (() => {
+  if (globalThis.__anime4kControllerLoaded) return;
+  globalThis.__anime4kControllerLoaded = true;
   const running = new WeakSet();
   const diagnostics = new Set();
   const hostname = location.hostname;
@@ -7,6 +9,10 @@
   const siteStorageKey = hostname;
   const legacySettingsKey = "anime4kSettings";
   const defaultShortcuts = { modeA: "1", modeB: "2", modeC: "3", quality: "q", scale: "s", stats: "F2", compare: "c", fluency: "g", fpsHud: "F3", aiImprove: "e", togglePanel: "F1" };
+  const anime4kExportNames = ["CNNx2UL", "CNNUL", "CNNx2VL", "CNNVL", "CNNSoftVL", "DenoiseCNNx2VL", "GANUUL", "Downscale"];
+  let anime4kLibrary = globalThis["anime4k-webgpu"] || null;
+  let anime4kLibraryLoadPromise = null;
+  let videoObserver = null;
   let shortcuts = { ...defaultShortcuts };
   let siteRecord = null;
   let siteActivated = false;
@@ -18,12 +24,6 @@
   let activeQuality = "Fast";
   let outputScale = 1;
   let globalDefaults = { mode: "A", quality: "Fast", scale: 1 };
-  const anime4kExportNames = ["CNNx2UL", "CNNUL", "CNNx2VL", "CNNVL", "CNNSoftVL", "DenoiseCNNx2VL", "GANUUL", "Downscale"];
-  const anime4kLibrary = globalThis["anime4k-webgpu"];
-  console.info("[Anime4K diagnóstico] Exports Anime4K WebGPU", {
-    requested: Object.fromEntries(anime4kExportNames.map((name) => [name, typeof anime4kLibrary?.[name] === "function"])),
-    available: Object.keys(anime4kLibrary || {})
-  });
   let detailEnabled = false;
   let detailIntensity = 0.5;
   let detailSizeMode = "Medio";
@@ -50,6 +50,25 @@
 
   function broadcast(method, ...args) {
     for (const diagnostic of diagnostics) diagnostic[method]?.(...args);
+  }
+
+  async function ensureAnime4kLibrary() {
+    anime4kLibrary = globalThis["anime4k-webgpu"] || anime4kLibrary;
+    if (anime4kLibrary) return anime4kLibrary;
+    if (!siteActivated) throw new Error("Activá Anime4K en este sitio para cargar la librería");
+    if (!anime4kLibraryLoadPromise) {
+      anime4kLibraryLoadPromise = globalThis.chrome.runtime.sendMessage({ channel: "anime4k-engine", action: "load" }).then((response) => {
+        if (!response?.ok) throw new Error(response?.error || "No se pudo cargar la librería Anime4K WebGPU");
+        anime4kLibrary = globalThis["anime4k-webgpu"] || null;
+        if (!anime4kLibrary) throw new Error("La librería se cargó, pero no publicó sus exports");
+        console.info("[Anime4K diagnóstico] Exports Anime4K WebGPU", {
+          requested: Object.fromEntries(anime4kExportNames.map((name) => [name, typeof anime4kLibrary?.[name] === "function"])),
+          available: Object.keys(anime4kLibrary || {})
+        });
+        return anime4kLibrary;
+      }).finally(() => { anime4kLibraryLoadPromise = null; });
+    }
+    return anime4kLibraryLoadPromise;
   }
 
   function normalizeShortcutKey(key) {
@@ -91,8 +110,7 @@
   }
 
   function saveSiteRecord() {
-    if (!extensionStorage) return;
-    if (!siteRecord) return;
+    if (!extensionStorage || !siteRecord) return false;
     const snapshot = JSON.parse(JSON.stringify(siteRecord));
     const signature = stableStringify(snapshot);
     const pending = pendingOwnSiteWrites.get(signature) || { count: 0, timer: null };
@@ -100,15 +118,16 @@
     if (pending.timer !== null) clearTimeout(pending.timer);
     pending.timer = setTimeout(() => pendingOwnSiteWrites.delete(signature), 10000);
     pendingOwnSiteWrites.set(signature, pending);
-    extensionStorage.set({ [siteStorageKey]: snapshot }).catch((error) => {
+    return extensionStorage.set({ [siteStorageKey]: snapshot }).then(() => true, (error) => {
       const current = pendingOwnSiteWrites.get(signature);
-      if (!current) return;
+      if (!current) return false;
       current.count -= 1;
       if (current.count <= 0) {
         clearTimeout(current.timer);
         pendingOwnSiteWrites.delete(signature);
       }
       console.warn("[Anime4K] No se pudo guardar este sitio", error);
+      return false;
     });
   }
 
@@ -226,7 +245,11 @@
       lineMaskDebugEnabled = false;
     }
     if (siteActivated && removedLegacyOptions) saveSiteRecord();
-    if (wasActivated && !siteActivated) broadcast("deactivate");
+    if (wasActivated && !siteActivated) {
+      videoObserver?.disconnect();
+      videoObserver = null;
+      broadcast("deactivate");
+    }
     else if (!wasActivated && siteActivated) {
       scan(document);
       broadcast("settingsReady");
@@ -284,7 +307,8 @@
     comparisonLabelsVisible = true;
     panelPosition = null;
     fpsHudPosition = null;
-    saveSiteRecord();
+    await saveSiteRecord();
+    if (!siteActivated) return;
     scan(document);
     broadcast("settingsReady");
   }
@@ -314,6 +338,8 @@
     panelPosition = null;
     fpsHudPosition = null;
     siteRecord = null;
+    videoObserver?.disconnect();
+    videoObserver = null;
     if (extensionStorage) extensionStorage.remove(siteStorageKey).catch((error) => console.warn("[Anime4K] No se pudo desactivar este sitio", error));
     broadcast("deactivate");
   }
@@ -510,9 +536,11 @@
   }
 
   if (extensionStorage) {
-    extensionStorage.get(null).then((stored) => {
+    const preferenceKeys = [siteStorageKey, shortcutsStorageKey, globalSettingsKey, legacySettingsKey];
+    extensionStorage.get(preferenceKeys).then((stored) => {
       const obsoleteCleanup = {};
-      for (const [key, value] of Object.entries(stored || {})) {
+      for (const key of [siteStorageKey, globalSettingsKey, legacySettingsKey]) {
+        const value = stored?.[key];
         if (!value || typeof value !== "object" || Array.isArray(value) || !Object.prototype.hasOwnProperty.call(value, "autoQualityEnabled")) continue;
         const cleaned = { ...value };
         delete cleaned.autoQualityEnabled;
@@ -3814,6 +3842,11 @@
           return;
         }
         if (gpuFailed) return;
+        if (!anime4kLibrary) {
+          say("Cargando librería Anime4K WebGPU…");
+          await ensureAnime4kLibrary();
+          if (stopped || !siteActivated || (!overlayEnabled && !aiPreviewActive)) return false;
+        }
         if (!gpuState) {
           say(`Inicializando WebGPU y Anime4K Modo ${activeMode} (${activeQuality})…`);
           const initializedState = await initializeGpu();
@@ -4215,18 +4248,27 @@
     playerMutationObserver.observe(playerContainer, { childList: true, subtree: true });
   }
 
+  function ensureVideoObserver() {
+    if (!siteActivated || !settingsLoaded || videoObserver) return;
+    videoObserver = new MutationObserver((changes) => {
+      for (const change of changes) for (const node of change.addedNodes) scan(node);
+    });
+    videoObserver.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
   function scan(root = document) {
-    if (!siteActivated || !settingsLoaded) return;
+    if (!siteActivated || !settingsLoaded) {
+      videoObserver?.disconnect();
+      videoObserver = null;
+      return;
+    }
+    ensureVideoObserver();
     const videos = [];
     if (root instanceof HTMLVideoElement) videos.push(root);
     if (root.querySelectorAll) videos.push(...root.querySelectorAll("video"));
     for (const video of videos) addDiagnostic(video);
   }
-
-  scan();
-  new MutationObserver((changes) => {
-    for (const change of changes) for (const node of change.addedNodes) scan(node);
-  }).observe(document.documentElement, { childList: true, subtree: true });
 })();
+
 
 

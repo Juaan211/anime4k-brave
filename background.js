@@ -1,4 +1,9 @@
 const AI_CHANNEL = "anime4k-ai";
+const ENGINE_CHANNEL = "anime4k-engine";
+const ENGINE_SCRIPTS = {
+  controller: "content.js",
+  engine: "vendor/anime4k-webgpu-1.0.0.js"
+};
 const OFFSCREEN_CHANNEL = "anime4k-ai-offscreen";
 const OFFSCREEN_PATH = "offscreen.html";
 let offscreenCreation = null;
@@ -24,6 +29,32 @@ async function ensureAiOffscreen() {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.channel === ENGINE_CHANNEL && sender.id === chrome.runtime.id) {
+    (async () => {
+      const script = ENGINE_SCRIPTS[message.action];
+      if (!script || !Number.isInteger(sender.tab?.id) || !Number.isInteger(sender.frameId)) {
+        throw new Error("No se pudo identificar la pestaña o el frame del reproductor");
+      }
+      const pageUrl = new URL(sender.url || sender.origin || "");
+      if (pageUrl.protocol !== "http:" && pageUrl.protocol !== "https:") {
+        throw new Error("Anime4K solo puede cargarse en páginas HTTP o HTTPS");
+      }
+      const hostname = pageUrl.hostname;
+      const saved = await chrome.storage.local.get(hostname);
+      if (saved?.[hostname]?.activated !== true) {
+        throw new Error("Este sitio todavía no está activado en Anime4K");
+      }
+      await chrome.scripting.executeScript({
+        target: { tabId: sender.tab.id, frameIds: [sender.frameId] },
+        files: [script],
+        world: "ISOLATED"
+      });
+      return { ok: true };
+    })().then(sendResponse, (error) => {
+      sendResponse({ ok: false, error: `${error?.name || "Error"}: ${error?.message || error}` });
+    });
+    return true;
+  }
   if (message?.channel !== AI_CHANNEL || sender.id !== chrome.runtime.id) return false;
   (async () => {
     if (message.action === "cancel") {
@@ -50,3 +81,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   });
   return true;
 });
+

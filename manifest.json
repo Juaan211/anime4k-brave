@@ -6,7 +6,12 @@
   "permissions": [
     "storage",
     "activeTab",
-    "offscreen"
+    "offscreen",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -52,11 +57,11 @@
         "https://*/*"
       ],
       "js": [
-        "vendor/anime4k-webgpu-1.0.0.js",
-        "content.js"
+        "bootstrap.js"
       ],
       "all_frames": true,
       "run_at": "document_idle"
     }
   ]
 }
+

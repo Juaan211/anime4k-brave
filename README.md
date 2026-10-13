@@ -55,13 +55,17 @@ La guía oficial explica que A, B y C tratan degradaciones diferentes y recomien
 
 Para reducir trabajo de CPU y de layout, la posición del canvas se actualiza aproximadamente 30 veces por segundo mientras se reproduce y 4 veces por segundo cuando está pausado, en vez de hacerlo en cada refresco del monitor. Esto reduce revisiones de la interfaz, pero no acelera por sí mismo los shaders. La calidad Máxima a 2× sigue siendo exigente: duplicar ancho y alto implica procesar cuatro veces más píxeles. Si hay tirones, bajar la escala o elegir HQ/Fast reduce la carga.
 
+En los sitios todavía desactivados solo queda un bootstrap liviano para F1. El controlador completo se carga al activar el dominio y la librería de shaders se carga cuando el filtro empieza a procesar. Esto puede demorar un poco la primera aparición del panel, pero mantiene los mismos shaders, presets y calidad durante el procesamiento.
+
 ## Diseño del panel
 
 El panel usa cristal oscuro, el logo transparente `assets/logo-perro.png` y mascotas decorativas locales de `assets/poodle-sprites.png`. Los adornos no reciben clics ni ejecutan animaciones continuas. En reproductores pequeños se ocultan los adornos y se compacta el panel, conservando el scroll interno. La sección de foto IA se despliega para mostrar sus acciones; al usar su atajo, se abre para mostrar el progreso.
 
 ## Archivos principales
 
-- `manifest.json`: configura Manifest V3, inyecta scripts en los frames y carga el bundle local.
+- `manifest.json`: configura Manifest V3, los permisos y el bootstrap liviano para los frames.
+- `bootstrap.js`: atiende F1 y carga el controlador solo en sitios activados.
+- `content.js`: maneja el panel y el procesamiento; el bundle de Anime4K se carga al empezar a renderizar.
 - `content.js`: detecta videos, maneja atajos, procesa Anime4K y filtros con WebGPU, e incluye las funciones experimentales documentadas en este archivo.
 - `tools/convert_model.py`: convierte el checkpoint oficial `.pth` a ONNX sin inventar pesos.
 - `models/README.md`: instrucciones de conversión y uso de los modelos incluidos.
