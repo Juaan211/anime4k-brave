@@ -20,6 +20,6 @@ El paquete implementa Anime4K en WebGPU y documenta los presets Mode A, B, C, AA
 ## ONNX Runtime Web (runtime opcional)
 
 - Proyecto: https://github.com/microsoft/onnxruntime
-- Paquete empaquetado: `onnxruntime-web` 1.30.0 (`vendor/ort.webgpu.min.mjs` y `vendor/ort-wasm-simd-threaded.jsep.wasm`); paquete descargado del registry oficial npm con integridad SHA-512 verificada.
+- Paquete empaquetado: `onnxruntime-web` 1.30.0 (`vendor/ort.webgpu.min.mjs`, `vendor/ort-wasm-simd-threaded.asyncify.mjs` y `vendor/ort-wasm-simd-threaded.asyncify.wasm`); paquete descargado del registry oficial npm con integridad SHA-512 verificada.
 - Licencia: MIT, https://github.com/microsoft/onnxruntime/blob/main/LICENSE
 - Aviso de licencia de la versión incluido en `vendor/ONNXRUNTIME-WEB-LICENSE-MIT.txt`.

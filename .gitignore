@@ -6,6 +6,9 @@
 # Descargas y copias temporales del runtime
 tools/ort-tmp/
 
+# Runtime alternativo de ONNX Runtime que no selecciona el bundle WebGPU usado.
+vendor/ort-wasm-simd-threaded.jsep.wasm
+
 # Archivos temporales de Python y del sistema
 __pycache__/
 *.py[cod]

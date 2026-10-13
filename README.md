@@ -53,7 +53,7 @@ La guía oficial explica que A, B y C tratan degradaciones diferentes y recomien
 
 ## Diseño del panel
 
-El panel usa cristal oscuro, acento azul y mascotas locales de `assets/poodle-sprites.png`. Los adornos no reciben clics ni ejecutan animaciones continuas. En reproductores pequeños se ocultan los adornos y se compacta el panel, conservando el scroll interno. La sección de foto IA se despliega para mostrar sus acciones; al usar su atajo, se abre para mostrar el progreso.
+El panel usa cristal oscuro, el logo transparente `assets/logo-perro.png` y mascotas decorativas locales de `assets/poodle-sprites.png`. Los adornos no reciben clics ni ejecutan animaciones continuas. En reproductores pequeños se ocultan los adornos y se compacta el panel, conservando el scroll interno. La sección de foto IA se despliega para mostrar sus acciones; al usar su atajo, se abre para mostrar el progreso.
 
 ## Archivos principales
 
@@ -62,7 +62,7 @@ El panel usa cristal oscuro, acento azul y mascotas locales de `assets/poodle-sp
 - `tools/convert_model.py`: convierte el checkpoint oficial `.pth` a ONNX sin inventar pesos.
 - `models/README.md`: instrucciones de conversión y uso de los modelos incluidos.
 - `popup.html`, `popup.css` y `popup.js`: muestran el hostname, activan o desactivan Anime4K y permiten elegir Fast, HQ o Máxima para ese dominio.
-- `icons/icon16.png`, `icons/icon32.png`, `icons/icon48.png` y `icons/icon128.png`: íconos de la extensión y del popup.
+- `icons/icon16.png`, `icons/icon32.png`, `icons/icon48.png` y `icons/icon128.png`: íconos de la extensión y del popup.\n- `assets/logo-perro.png`: logo con fondo transparente para el panel y el popup.
 - `vendor/anime4k-webgpu-1.0.0.js`: bundle de la librería.
 - `vendor/ANIME4K-WEBGPU-LICENSE-MIT.txt`: licencia MIT incluida con el bundle.
 - `THIRD_PARTY_NOTICES.md`: aviso de terceros.

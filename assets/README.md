@@ -1,5 +1,7 @@
 # Arte del panel
 
+`logo-perro.png` es el recorte con fondo transparente de la foto aportada para el encabezado del panel y el popup. `poodle-sprites.png` contiene las ilustraciones decorativas del panel.
+
 `poodle-sprites.png` contiene cuatro ilustraciones transparentes en una cuadrícula 2×2. Se generaron con la herramienta integrada imagegen tomando como referencia la imagen azul aportada por el usuario. No se cargan imágenes ni fuentes de Internet.
 
 Resumen del prompt: atlas cuadrado transparente 2×2, poodle marrón asomado con patas delante (arriba izquierda), poodle marrón inclinado asomado por un lateral (arriba derecha), poodle blanco con sombrero de paja y cinta roja (abajo izquierda), poodle blanco dormido sobre sus patas (abajo derecha); estilo anime pintado, ojos grandes, pelaje rizado, sin fondo, texto ni controles de interfaz.

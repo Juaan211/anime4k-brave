@@ -638,7 +638,7 @@
     let diagnosticController = null;
     let sizeObserver = null;
     let playerMutationObserver = null;
-    let positionFrameId = null;
+    let positionTimer = null;
 
     const canvas = document.createElement("canvas");
     const aiResultCanvas = document.createElement("canvas");
@@ -912,8 +912,8 @@
         #panel::before { left:20px; right:20px; background:linear-gradient(90deg,transparent,#caf1ff,transparent); opacity:.8; }
         #panel > header,#panel > #tabs,#panel > #tab-content,#panel > #frame-stats { position:relative; z-index:1; }
         header { gap:7px; min-height:50px; padding:0 0 9px; border-bottom-color:rgba(220,230,249,.24); }
-        #brand-mark { width:42px; height:42px; border:1px solid #c5efff; border-radius:11px; background-color:#e3f3fa; background-image:var(--ak-poodles); background-size:200% 200%; background-position:0 100%; box-shadow:0 0 0 3px rgba(7,19,31,.85),0 0 12px rgba(126,206,255,.23); }
-        #brand-mark img { display:none; }
+        #brand-mark { width:48px; height:48px; padding:2px; border:1px solid rgba(79,209,197,.42); border-radius:12px; background:rgba(8,16,26,.18); box-shadow:0 0 0 2px rgba(7,19,31,.62),0 0 14px rgba(79,209,197,.16); }
+        #brand-mark img { display:block; width:100%; height:100%; object-fit:contain; }
         #panel[data-enabled="true"] #brand-mark { border-color:#c4ecff; box-shadow:0 0 0 3px rgba(7,19,31,.85),0 0 12px rgba(126,206,255,.23); }
         .brand-copy { flex:1; min-width:0; gap:4px; }
         .brand-copy strong { font-size:17px; font-weight:650; letter-spacing:-.02em; }
@@ -1057,7 +1057,7 @@
           <svg class="skin-paw paw-left" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="8" cy="9" rx="3" ry="4"/><ellipse cx="16" cy="6" rx="3" ry="4"/><ellipse cx="24" cy="9" rx="3" ry="4"/><ellipse cx="28" cy="16" rx="2.5" ry="3.5"/><path d="M8 25c-3-5 4-14 8-14s12 9 8 14c-2 3-6 0-8 0s-6 3-8 0Z"/></svg><svg class="skin-paw paw-right" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="8" cy="9" rx="3" ry="4"/><ellipse cx="16" cy="6" rx="3" ry="4"/><ellipse cx="24" cy="9" rx="3" ry="4"/><ellipse cx="28" cy="16" rx="2.5" ry="3.5"/><path d="M8 25c-3-5 4-14 8-14s12 9 8 14c-2 3-6 0-8 0s-6 3-8 0Z"/></svg><svg class="skin-paw paw-bottom" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="8" cy="9" rx="3" ry="4"/><ellipse cx="16" cy="6" rx="3" ry="4"/><ellipse cx="24" cy="9" rx="3" ry="4"/><ellipse cx="28" cy="16" rx="2.5" ry="3.5"/><path d="M8 25c-3-5 4-14 8-14s12 9 8 14c-2 3-6 0-8 0s-6 3-8 0Z"/></svg>
           <span class="skin-star star-top">✧</span><span class="skin-star star-right">✧</span><span class="skin-heart">♡</span>
         </div>
-        <header><span id="brand-mark"><img src="${chrome.runtime.getURL("icons/icon32.png")}" alt=""></span><span class="brand-copy"><strong>Anime4K</strong><span class="brand-subtitle">Mejora tu experiencia visual</span></span><span id="status-dot" aria-hidden="true"></span><span id="status-state" aria-hidden="true"></span><button id="minimize" type="button" aria-label="Minimizar panel" data-tooltip="Minimizar panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button><button id="dismiss" type="button" title="Ocultar panel" aria-label="Ocultar panel">×</button></header>
+        <header><span id="brand-mark"><img src="${chrome.runtime.getURL("assets/logo-perro.png")}" alt=""></span><span class="brand-copy"><strong>Anime4K</strong><span class="brand-subtitle">Mejora tu experiencia visual</span></span><span id="status-dot" aria-hidden="true"></span><span id="status-state" aria-hidden="true"></span><button id="minimize" type="button" aria-label="Minimizar panel" data-tooltip="Minimizar panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button><button id="dismiss" type="button" title="Ocultar panel" aria-label="Ocultar panel">×</button></header>
         <nav id="tabs" role="tablist" aria-label="Secciones Anime4K"><span class="tab-indicator" aria-hidden="true"></span><button type="button" role="tab" data-tab="image" aria-selected="true" title="Imagen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m5 17 5-5 3 3 3-4 3 6"/></svg><span>Imagen</span></button><button type="button" role="tab" data-tab="filters" aria-selected="false" title="Filtros"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/><circle cx="8" cy="6" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="12" cy="18" r="1.5"/></svg><span>Filtros</span></button><button type="button" role="tab" data-tab="frames" aria-selected="false" title="Generación de fotogramas (experimental; atajo configurable)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5zM9 9l6 3-6 3z"/></svg><span>Fotogramas</span></button><button type="button" role="tab" data-tab="info" aria-selected="false" title="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Info</span></button></nav>
         <div id="tab-content">
           <div class="tab-page is-active" data-page="image" role="tabpanel">
@@ -4099,9 +4099,9 @@
     const positionLoop = () => {
       if (stopped) return;
       placeOverlay();
-      positionFrameId = requestAnimationFrame(positionLoop);
+      positionTimer = setTimeout(positionLoop, video.paused ? 250 : 33);
     };
-    positionFrameId = requestAnimationFrame(positionLoop);
+    positionLoop();
 
     video.addEventListener("loadedmetadata", placeOverlay);
     video.addEventListener("loadedmetadata", scheduleGpuResize);
@@ -4148,6 +4148,8 @@
     document.addEventListener("fullscreenchange", scheduleGpuResize);
     document.addEventListener("fullscreenchange", resetOnSeek);
     window.addEventListener("resize", scheduleGpuResize);
+    const handleWindowScroll = () => placeOverlay();
+    window.addEventListener("scroll", handleWindowScroll, { capture: true, passive: true });
     if (typeof ResizeObserver !== "undefined") {
       sizeObserver = new ResizeObserver(scheduleGpuResize);
       sizeObserver.observe(video);
@@ -4162,7 +4164,7 @@
       if (fluencyFailureNoticeTimer !== null) clearTimeout(fluencyFailureNoticeTimer);
       if (resizeTimer !== null) clearTimeout(resizeTimer);
       if (callbackId !== null && video.cancelVideoFrameCallback) video.cancelVideoFrameCallback(callbackId);
-      if (positionFrameId !== null) cancelAnimationFrame(positionFrameId);
+      if (positionTimer !== null) clearTimeout(positionTimer);
       sizeObserver?.disconnect();
       tabContentResizeObserver.disconnect();
       playerMutationObserver?.disconnect();
@@ -4181,6 +4183,7 @@
       document.removeEventListener("fullscreenchange", scheduleGpuResize);
       document.removeEventListener("fullscreenchange", resetOnSeek);
       window.removeEventListener("resize", scheduleGpuResize);
+      window.removeEventListener("scroll", handleWindowScroll, true);
       playerContainer.removeEventListener("pointermove", revealPanel, true);
       playerContainer.removeEventListener("pointerdown", revealPanel, true);
       uiHost.removeEventListener("pointermove", revealPanel, true);

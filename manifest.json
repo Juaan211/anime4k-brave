@@ -34,8 +34,9 @@
       "resources": [
         "icons/*",
         "models/*.onnx",
-        "vendor/ort*.mjs",
-        "vendor/ort*.wasm",
+        "vendor/ort.webgpu.min.mjs",
+        "vendor/ort-wasm-simd-threaded.asyncify.mjs",
+        "vendor/ort-wasm-simd-threaded.asyncify.wasm",
         "assets/*"
       ],
       "matches": [
