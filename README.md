@@ -1,4 +1,4 @@
-# Anime4K hecho por juanito0211 — WebGPU con modos y calidad
+# Anime4K — WebGPU con modos y calidad
 
 ## Descargar e instalar
 
