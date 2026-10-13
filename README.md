@@ -1,8 +1,8 @@
-# Anime4K  — WebGPU con modos y calidad
+# Anime4K hecho por juanito0211 — WebGPU con modos y calidad
 
 ## Descargar e instalar
 
-Descargá el ZIP de la versión desde **Releases** en GitHub y extraelo en una carpeta. En Brave, abrí `brave://extensions`, activá **Modo desarrollador**, elegí **Cargar desempaquetada** y seleccioná la carpeta extraída que contiene `manifest.json`. La extensión todavía no está publicada en Chrome Web Store; este método permite probarla desde el repositorio.
+En GitHub, elegí **Code → Download ZIP** y extraelo en una carpeta. En Brave, abrí `brave://extensions`, activá **Modo desarrollador**, elegí **Cargar desempaquetada** y seleccioná la carpeta extraída que contiene `manifest.json`. La extensión todavía no está publicada en Chrome Web Store ni tiene un paquete en Releases; este método permite probarla desde el repositorio.
 
 Por seguridad, cada hostname empieza desactivado: no aparece la interfaz ni se procesa ningún video. Presioná **F1** una vez para activar Anime4K en ese sitio. En sitios activados aparece un panel translúcido dentro del reproductor, con Shadow DOM para aislarlo del CSS del sitio. Se muestra al mover el mouse y se oculta tras 3 segundos sin actividad. La **X** activa el modo manual persistente; el panel solo vuelve con F1 o con el indicador casi transparente de la esquina. El botón **Desactivar en este sitio** borra la activación y retira el canvas, restaura el video y detiene el procesamiento. El panel intenta colocarse en una esquina libre de controles y subtítulos. Al entrar en pantalla completa, se mueve dentro del elemento que ocupa la pantalla.
 
@@ -60,7 +60,7 @@ El panel usa cristal oscuro, acento azul y mascotas locales de `assets/poodle-sp
 - `manifest.json`: configura Manifest V3, inyecta scripts en los frames y carga el bundle local.
 - `content.js`: detecta videos, maneja atajos, procesa Anime4K y filtros con WebGPU, e incluye las funciones experimentales documentadas en este archivo.
 - `tools/convert_model.py`: convierte el checkpoint oficial `.pth` a ONNX sin inventar pesos.
-- `models/README.md`: instrucciones del modelo local; los pesos no se distribuyen.
+- `models/README.md`: instrucciones de conversión y uso de los modelos incluidos.
 - `popup.html`, `popup.css` y `popup.js`: muestran el hostname, activan o desactivan Anime4K y permiten elegir Fast, HQ o Máxima para ese dominio.
 - `icons/icon16.png`, `icons/icon32.png`, `icons/icon48.png` y `icons/icon128.png`: íconos de la extensión y del popup.
 - `vendor/anime4k-webgpu-1.0.0.js`: bundle de la librería.
@@ -93,4 +93,3 @@ En **Imagen**, pausá el video en un frame nítido y tocá **Procesar foto con I
 **Ejemplo para sacar una captura cuidada:** pausá en el instante más enfocado; para comparar, poné Anime4K en **Máxima** y elegí **2×** o **Auto**; activá **Detalle** y ajustá **Nitidez** con moderación si querés que esos filtros también afecten la vista IA; procesá la foto, compará con Anime4K y guardá el PNG. La calidad y escala de Anime4K solo afectan la vista Anime4K; el modelo de foto produce x2 fijo. Detalle y Nitidez sí se aplican a la salida IA cuando están activados.
 
 La sesión ONNX se inicia solo cuando pedís procesar una imagen pausada; no procesa video en vivo ni reserva la sesión durante la reproducción. Si el navegador bloquea la lectura del video por CORS/DRM o falta el modelo/WebGPU, el panel muestra un aviso. La inferencia WebGPU y la presentación final deben confirmarse en Brave real.
-

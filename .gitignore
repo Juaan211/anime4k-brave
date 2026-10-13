@@ -1,0 +1,14 @@
+# Entornos locales y dependencias usadas para convertir el modelo
+.venv-tools/
+.tmp-tools/
+.tmp-venv-bootstrap/
+
+# Descargas y copias temporales del runtime
+tools/ort-tmp/
+
+# Archivos temporales de Python y del sistema
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+Desktop.ini

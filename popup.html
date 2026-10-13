@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Anime4K</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="card">
+      <header>
+        <img src="icons/icon32.png" alt="" width="32" height="32">
+        <div>
+          <h1>Anime4K</h1>
+          <p>Activación por sitio</p>
+        </div>
+      </header>
+      <div class="domain-label">Dominio actual</div>
+      <div id="domain" class="domain-chip">Buscando pestaña…</div>
+      <label class="switch-row" for="site-switch">
+        <span class="switch-copy">
+          <span id="switch-title" class="switch-title">Anime4K en este sitio</span>
+          <span class="status-line" role="status" aria-live="polite">
+            <span id="status-dot" class="status-dot" aria-hidden="true"></span>
+            <span id="status">Leyendo configuración…</span>
+          </span>
+        </span>
+        <span class="switch-control">
+          <input id="site-switch" class="switch-input" type="checkbox" role="switch" aria-checked="false" aria-labelledby="switch-title status" disabled>
+          <span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span>
+        </span>
+      </label>
+      <section class="quality-row" aria-label="Calidad Anime4K en este sitio">
+        <div class="quality-heading"><span>Calidad</span><span id="quality-help">Se guarda por dominio</span></div>
+        <div id="quality-switcher" class="quality-switcher" role="group" aria-label="Elegir calidad">
+          <button type="button" data-quality="Fast" aria-pressed="false">Fast</button>
+          <button type="button" data-quality="HQ" aria-pressed="false">HQ</button>
+          <button type="button" data-quality="Máxima" aria-pressed="false">Máxima</button>
+        </div>
+      </section>
+      <label class="switch-row filter-row" for="detail-switch">
+        <span class="switch-copy">
+          <span id="detail-title" class="switch-title">Detalle</span>
+          <span class="filter-description">Realza la textura de los fondos</span>
+        </span>
+        <span class="switch-control">
+          <input id="detail-switch" class="switch-input" type="checkbox" role="switch" aria-checked="false" aria-labelledby="detail-title" disabled>
+          <span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span>
+        </span>
+      </label>
+      <details class="shortcuts-section" id="shortcuts-section">
+        <summary>Atajos</summary>
+        <div id="shortcut-list" class="shortcut-list"></div>
+        <button id="reset-shortcuts" class="reset-shortcuts" type="button">Restablecer atajos</button>
+        <p id="shortcut-message" class="shortcut-message" role="status" aria-live="polite" hidden></p>
+      </details>
+      <p id="error" class="error" role="alert" hidden></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
